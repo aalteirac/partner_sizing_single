@@ -1,0 +1,7 @@
+streamlit==1.25.0
+hydralit_components==1.0.10
+snowflake-snowpark-python==1.6.1
+ConfigParser==5.3.0
+streamlit-highcharts==0.2.0
+Pillow==9.5.0
+streamlit-login-page==0.1.9

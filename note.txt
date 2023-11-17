@@ -1,0 +1,42 @@
+To add a new KPI for Radar chart:
+- In Snowhouse:
+    - Define a copy into Azure Blob in Snowhouse running the query for the desired KPI
+    - single file (it's small), with a meaningful name
+
+*************************************************
+            CREATE OR REPLACE FILE FORMAT dumpCSV
+            TYPE = CSV
+            FIELD_DELIMITER = ','
+            NULL_IF = ('NULL', 'null')
+            EMPTY_FIELD_AS_NULL = true
+            COMPRESSION = NONE;
+            
+            COPY INTO @TEMP.AALTEIRAC.AZUREANTHONY/dumplast28DaysCredits.csv from (
+                select "PARTNER_NAME",sum("L28DAYS") from temp.ravikumar.final_connected_app_credits_last28Days group by "PARTNER_NAME"
+            ) 
+            FILE_FORMAT = (FORMAT_NAME ='dumpCSV' COMPRESSION='NONE') SINGLE=true OVERWRITE=TRUE;
+*************************************************
+
+
+- In My Snowflake Account:
+    - Create or replace command for the destination table, according to the orginal query
+    - A Copy into this table
+
+*************************************************
+            CREATE OR REPLACE TABLE SIZING_APP_DB.SIZING_APP_SC.LAST_MONTH_CREDITS (
+            "PARTNER_NAME" VARCHAR(255),  
+            "L28DAYS" NUMBER
+            );
+
+            COPY INTO SIZING_APP_DB.SIZING_APP_SC.LAST_MONTH_CREDITS
+            FROM 'azure://aalteirac.blob.core.windows.net/containersizing/dumplast28DaysCredits.csv'
+            CREDENTIALS=(AZURE_SAS_TOKEN='<MY_SAS_TOKEN>')
+            FILE_FORMAT = (TYPE = CSV FIELD_DELIMITER = ',' SKIP_HEADER = 0);
+*************************************************
+
+
+- In app:
+ - in lib.py implement the query for the new kpi, add it to getAllKPI
+ - in bench.py, add Y axis, improvement needed to make that generic
+
+ RUN: python -m streamlit run index.py  

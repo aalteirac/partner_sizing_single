@@ -1,0 +1,304 @@
+{
+    "name": "H", 
+    "input_col":3,
+    "result_col":4,
+    "chart_col":2,
+    "input": [
+        {
+            "id":"credit_price", 
+            "label":"Credit Price ($ per credit)",
+            "type":"number",
+            "default":4.4
+        },
+        {
+            "id":"ingest_day", 
+            "label":"Ingest (Compressed TB per day before hitting SF)",
+            "type":"number",
+            "rangemin":0.000,
+            "rangemax":10.000,
+            "rangestep":1.000,
+            "default":5.000
+        },
+        {
+            "id":"compression_rate",
+            "default":0.25,
+            "label":"Compression Rate",
+            "type":"select",
+            "entries":[0.25,0.50],
+            "entries_label":["CSV,JSON,AVRO","XML,PARQUET,ORC"],
+            "visibility":"hidden"
+        },
+        {
+            "id":"storage_cost", 
+            "label":"Storage cost ($ per TB)",
+            "type":"number",
+            "rangemin":10,
+            "rangemax":50,
+            "rangestep":1,
+            "default":23
+        },
+        {
+            "id":"data_retention", 
+            "label":"Data Retention (Years)",
+            "type":"number",
+            "rangemin":0,
+            "rangemax":10,
+            "rangestep":1,
+            "default":1
+        },
+        {
+            "id":"extract_hours", 
+            "label":"Extract Hours",
+            "type":"number",
+            "rangemin":0,
+            "rangemax":24,
+            "rangestep":1,
+            "default":24,
+            "visibility":"hidden"
+        },
+        {
+            "id":"search_wh_size",
+            "default":1,
+            "label":"Search Warehouse Size",
+            "type":"select",
+            "entries":[1,2,4,8,16,32,64,128,256,512],
+            "entries_label":["XSmall","Small","Medium","Large","XL","2XL","3XL","4XL","5XL","6XL"],
+            "visibility":"hidden",
+            "disabled":true
+        },
+        {
+            "id":"search_hours", 
+            "label":"Search Hours",
+            "type":"number",
+            "rangemin":1,
+            "rangemax":10,
+            "rangestep":1,
+            "default":8
+        },
+        {
+            "id":"extract_wh_size",
+            "default":2,
+            "label":"Extract Warehouse Size",
+            "type":"select",
+            "suggest":"warehousecustom(ingest_day,[0.5,1,5,10],[1,2,3,4])",
+            "entries":[1,2,4,8,16,32,64,128,256,512],
+            "entries_label":["XSmall","Small","Medium","Large","XL","2XL","3XL","4XL","5XL","6XL"],
+            "visibility":"yes"
+        },
+        {
+            "id":"snowpipe_credits_tb", 
+            "label":"Snowpipe cost (Credits per  Compressed TB)",
+            "type":"number",
+            "rangemin":10,
+            "rangemax":50,
+            "rangestep":1,
+            "default":40,
+            "visibility":"hidden"
+        },
+        {
+            "id":"clustering_credits_tb", 
+            "label":"Clustering Cost (Credits per TB ingested per day)",
+            "type":"number",
+            "rangemin":1,
+            "rangemax":30,
+            "rangestep":1,
+            "default":10,
+            "visibility":"hidden"
+        }
+
+    ],
+    "calculations":[
+        {
+            "id":"ingest_daily",
+            "label":"INGEST CREDITS /DAY",
+            "calc":"ingest_day  * snowpipe_credits_tb",
+            "visibility":"hidden"
+        },
+        {
+            "id":"clustering_daily",
+            "label":"CLUSTERING CREDITS /DAY",
+            "calc":"clustering_credits_tb * compression_rate * ingest_day",
+            "visibility":"hidden"
+        },
+        {
+            "id":"total_ingestion_daily",
+            "label":"TOTAL INGESTION CREDITS /DAY",
+            "calc":"ingest_daily + clustering_daily",
+            "visibility":"hidden"
+        },
+        {
+            "id":"ingest_yearly",
+            "label":"INGEST CREDITS /YEAR",
+            "calc":"ingest_daily * 365",
+            "visibility":"hidden"
+        },
+        {
+            "id":"clustering_yearly",
+            "label":"CLUSTERING CREDITS /YEAR",
+            "calc":"clustering_daily * 365",
+            "visibility":"hidden"
+        },
+        {
+            "id":"total_ingestion_yearly",
+            "label":"TOTAL INGESTION CREDITS/YEAR",
+            "calc":"total_ingestion_daily * 365",
+            "visibility":"hidden"
+        },
+        {
+            "id":"ingest_cost_yearly",
+            "label":"INGEST COST /YEAR $",
+            "format":",.0f",
+            "unit":"$",
+            "calc":"credit_price * ingest_yearly",
+            "visibility":"hidden"
+        },
+        {
+            "id":"clustering_cost_yearly",
+            "label":"CLUSTERING COST /YEAR $",
+            "format":",.0f",
+            "unit":"$",
+            "calc":"credit_price * clustering_yearly",
+            "visibility":"hidden"
+        },
+        {
+            "id":"total_ingestion_cost_yearly",
+            "label":"TOTAL INGESTION COST /YEAR $",
+            "format":",.0f",
+            "unit":"$",
+            "calc":"ingest_cost_yearly + clustering_cost_yearly",
+            "visibility":"hidden"
+        },
+        {
+            "id":"transfo_credits_daily",
+            "label":"TRANSFO-EXTRACT CREDITS /DAY",
+            "calc":"(extract_hours * 60)* extract_wh_size/60",
+            "visibility":"hidden"
+        },
+        {
+            "id":"transfo_credits_yearly",
+            "label":"TRANSFO-EXTRACT CREDITS /YEAR",
+            "calc":"transfo_credits_daily* 365",
+            "visibility":"hidden"
+        },
+        {
+            "id":"transfo_cost_yearly",
+            "label":"TRANSFO-EXTRACT COST /YEAR $",
+            "format":",.0f",
+            "unit":"$",
+            "calc":"transfo_credits_yearly * credit_price",
+            "visibility":"hidden"
+        },
+        {
+            "id":"search_credits_daily",
+            "label":"SEARCH WAREHOUSE CREDITS /DAY",
+            "calc":"(search_hours * 60)* search_wh_size/60",
+            "visibility":"hidden"
+        },
+        {
+            "id":"search_credits_yearly",
+            "label":"SEARCH WAREHOUSE CREDITS /YEAR",
+            "calc":"search_credits_daily * 365",
+            "visibility":"hidden"
+        },
+        {
+            "id":"search_cost_yearly",
+            "label":"SEARCH WAREHOUSE COST /YEAR $",
+            "format":",.0f",
+            "unit":"$",
+            "calc":"search_credits_yearly * credit_price",
+            "visibility":"hidden"
+        },
+        {
+            "id":"search_wh_size_out",
+            "label":"Search Warehouse Size",
+            "entries":[1,2,4,8,16,32,64,128,256,512],
+            "entries_label":["XSmall","Small","Medium","Large","XL","2XL","3XL","4XL","5XL","6XL"],
+            "calc":"search_wh_size"
+        },
+        {
+            "id":"extract_wh_size_out",
+            "label":"Extract Warehouse Size",
+            "entries":[1,2,4,8,16,32,64,128,256,512],
+            "entries_label":["XSmall","Small","Medium","Large","XL","2XL","3XL","4XL","5XL","6XL"],
+            "calc":"extract_wh_size"
+        },
+        {
+            "id":"total_credits_daily",
+            "label":"TOTAL COMPUTE CREDITS /DAY",
+            "calc":"total_ingestion_daily + transfo_credits_daily + search_credits_daily"
+        },
+        {
+            "id":"total_credits_yearly",
+            "label":"TOTAL COMPUTE CREDITS /YEAR",
+            "calc":"total_credits_daily * 365"
+        },
+        {
+            "id":"total_compute_cost_yearly",
+            "label":"TOTAL COMPUTE COST /YEAR $",
+            "format":",.0f",
+            "unit":"$",
+            "calc":"total_credits_yearly * credit_price"
+        },
+        {
+            "id":"total_data_daily",
+            "label":"TOTAL DATA VOLUME TB/DAY ",
+            "format":",.2f",
+            "calc":"ingest_day * (1 - compression_rate)"
+        },
+        {
+            "id":"total_data_cost_yearly",
+            "label":"TOTAL DATA COST /YEAR $",
+            "format":",.0f",
+            "unit":"$",
+            "calc":"total_data_daily * data_retention * 365 * storage_cost * 6"
+        },
+        {
+            "id":"grand_total",
+            "label":"GRAND TOTAL /YEAR $",
+            "format":",.0f",
+            "unit":"$",
+            "calc":"total_data_cost_yearly + total_compute_cost_yearly"
+        }
+
+    ],
+    "chart":[
+        {
+        "type":"pie",
+        "title":"DATA/COMPUTE YEARLY COST",
+        "categories":
+            [
+                {
+                    "label":"DATA COST",
+                    "measure":"total_data_cost_yearly"
+                },
+                {
+                    "label":"COMPUTE COST",
+                    "measure":"total_compute_cost_yearly"
+                }
+            ]
+        },
+        {
+        "type":"pie",
+        "title":"COMPUTE DETAILS YEARLY COST",
+        "categories":
+            [
+                {
+                    "label":"INGESTION COST",
+                    "measure":"ingest_cost_yearly"
+                },
+                {
+                    "label":"CLUSTERING COST",
+                    "measure":"clustering_cost_yearly"
+                },
+                {
+                    "label":"TRANSFORMATION COST",
+                    "measure":"transfo_cost_yearly"
+                },
+                {
+                    "label":"SEARCH COST",
+                    "measure":"search_cost_yearly"
+                }
+            ]
+        }
+    ]
+}
