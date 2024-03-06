@@ -15,7 +15,7 @@
             "label":"Ingest (Compressed TB per day before hitting SF)",
             "type":"number",
             "rangemin":0.000,
-            "rangemax":10.000,
+            "rangemax":20.000,
             "rangestep":1.000,
             "default":5.000
         },
@@ -41,9 +41,9 @@
             "id":"data_retention", 
             "label":"Data Retention (Years)",
             "type":"number",
-            "rangemin":0,
-            "rangemax":10,
-            "rangestep":1,
+            "rangemin":0.00,
+            "rangemax":10.00,
+            "rangestep":1.00,
             "default":1
         },
         {
@@ -58,13 +58,12 @@
         },
         {
             "id":"search_wh_size",
-            "default":1,
+            "default":8,
             "label":"Search Warehouse Size",
             "type":"select",
+            "suggest":"warehousecustom(ingest_day*30,[8, 15, 31, 63, 127, 255, 511, 1024], [1, 2, 3, 4, 5, 6, 7, 8])",
             "entries":[1,2,4,8,16,32,64,128,256,512],
-            "entries_label":["XSmall","Small","Medium","Large","XL","2XL","3XL","4XL","5XL","6XL"],
-            "visibility":"visible",
-            "disabled":true
+            "entries_label":["XSmall","Small","Medium","Large","XL","2XL","3XL","4XL","5XL","6XL"]
         },
         {
             "id":"search_hours", 
@@ -83,7 +82,7 @@
             "suggest":"warehousecustom(ingest_day,[0.5,1,5,10],[1,2,3,4])",
             "entries":[1,2,4,8,16,32,64,128,256,512],
             "entries_label":["XSmall","Small","Medium","Large","XL","2XL","3XL","4XL","5XL","6XL"],
-            "visibility":"yes"
+            "visibility":"visible"
         },
         {
             "id":"snowpipe_credits_tb", 
